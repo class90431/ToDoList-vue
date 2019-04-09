@@ -145,141 +145,134 @@
 </div>
 
 
-<div id="app">
+<div id="app" class="container my-3">
   <div class="input-group mb-3">
     <div class="input-group-prepend">
       <span class="input-group-text" id="basic-addon1">待辦事項</span>
     </div>
-    <input type="text" v-model="newToDo" v-on:keyup.enter="addTodo" class="form-control" placeholder="準備要做的任務">
+    <input type="text" class="form-control" placeholder="準備要做的任務"v-model="newToDo" @keyup.enter="addTodo">
     <div class="input-group-append">
-      <button v-on:click="addTodo" class="btn btn-primary" type="button">新增</button>
+      <button class="btn btn-primary" type="button" @click.prevent="addTodo">新增</button>
     </div>
   </div>
   <div class="card text-center">
     <div class="card-header">
       <ul class="nav nav-tabs card-header-tabs">
         <li class="nav-item">
-          <a class="nav-link" href="#" v-bind:class="{'active':visibility=='all'}" v-on:click.prevent="visibility='all'">全部</a>
+          <a class="nav-link" v-bind:class="{active:visibility=='all'}" @click.prevent="visibility='all'" href="#">全部</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#" v-bind:class="{'active':visibility=='active'}" v-on:click.prevent="visibility='active'">進行中</a>
+          <a class="nav-link" v-bind:class="{active:visibility=='active'}" @click.prevent="visibility='active'" href="#">進行中</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#" v-bind:class="{'active':visibility=='completed'}" v-on:click.prevent="visibility='completed'">已完成</a>
+          <a class="nav-link" v-bind:class="{active:visibility=='completed'}" @click.prevent="visibility='completed'" href="#">已完成</a>
         </li>
       </ul>
     </div>
     <ul class="list-group list-group-flush text-left">
-      <li class="list-group-item " v-for="(item,key) in filterToDo" v-on:dblclick="editToDo(item)">
-        <div class="d-flex" v-if="item.id !== cacheToDo.id">
+      <li class="list-group-item " v-for="(item,key) in filterTodo" @dblclick="editTodo(item)">
+        <div class="d-flex" v-if="item.id !== cacheTodo.id">
           <div class="form-check">
-            <input type="checkbox" class="form-check-input" v-model="item.completed" v-bind:id="item.id">
-            <label class="form-check-label comp" v-bind:for="item.id"  v-bind:class="{'completed':item.completed}">
-              {{ item.title }}
+            <input type="checkbox" class="form-check-input" id="a1" v-model="item.completed">
+            <label class="form-check-label " for="a1" v-bind:class="{completed:item.completed}">
+              {{item.title}}
             </label>
           </div>
-          <button type="button" class="close ml-auto" aria-label="Close">
-            <span aria-hidden="true" v-on:click.prevent="removeToDo(item)">&times;</span>
+          <button type="button" class="close ml-auto" aria-label="Close"@click.prevent="removeTodo(item)">
+            <span aria-hidden="true">&times;</span>
           </button>
         </div>
-        <input type="text" class="form-control"
-        v-model="cacheTitle" v-on:keyup.esc="cancelEdit"
-        v-on:keyup.enter="doneEdit(item)"
-        v-if="item.id == cacheToDo.id">
+        <input type="text" class="form-control" v-if="item.id == cacheTodo.id" @keyup.esc="cancelEdit" v-model="cacheTitle" @keyup.enter="doneEdit(item)">
       </li>
-      <!-- <li class="list-group-item">
+<!--       <li class="list-group-item">
         <input type="text" class="form-control">
       </li> -->
     </ul>
     <div class="card-footer d-flex justify-content-between">
-      <span>還有 3 筆任務未完成</span>
-      <a href="#" v-on:click.prevent="removeAll">清除所有任務</a>
+      <span>還有 {{noDoneTodo}} 筆任務未完成</span>
+      <a href="#" @click.prevent="removeAllTodo">清除所有任務</a>
     </div>
   </div>
 </div>
 
 <script>
 var app = new Vue({
-  el: '#app',
-  data: {
+  el:'#app',
+  data:{
     newToDo:'',
-    todos:[
-      {
-        id:"123",
-        title:'321',
-        completed:false
-      }
-    ],
+    todos:[],
     visibility:'all',
-    cacheToDo:{},
-    cacheTitle:''
+    cacheTodo:{},
+    cacheTitle:'',
   },
-  methods: {
+  methods:{
     addTodo:function(){
-      var timestamp = Date.now();
-      if(this.newToDo.trim()==""){
-        alert('不可為空')
-        return
+      if(this.newToDo.trim()==''){
+        alert('不可為空！');
+        return;
       }else{
+        var timestamp = Date.now();
         this.todos.push(
         {
-          id:timestamp,
-          title:this.newToDo,
-          completed:false
+        id:timestamp,
+        title:this.newToDo,
+        completed:false
         }
-        )
-      }
-      this.newToDo='';
+        );
+        this.newToDo="";
+      };
     },
-    removeAll:function(){
+    removeTodo:function(item){
+      this.todos.splice(this.todos.indexOf(item),1)
+    },
+    removeAllTodo:function(){
       this.todos.splice(0,this.todos.length)
     },
-    removeToDo:function(todo){
-      var newIndex = '';
-      var vm = this;
-      vm.todos.forEach(function (item,key) {
-        if(todo.id == item.id){
-          newIndex = key;
-        }
-      })
-      this.todos.splice(newIndex,1)
-    },
-    editToDo:function(item){
-      this.cacheToDo = item
-      this.cacheTitle = item.title
+    editTodo:function(item){
+      this.cacheTodo = item;
+      this.cacheTitle = item.title;
     },
     cancelEdit:function(){
-      this.cacheToDo = {}; 
+      this.cacheTodo={};
     },
-    doneEdit:function (item) {
+    doneEdit:function(item){
       item.title = this.cacheTitle;
-      this.cacheToDo={};
-      this.cacheTitle="";
+      this.cacheTodo={};
+      this.cacheTitle='';
     }
   },
-  computed: {
-    filterToDo:function(){
+  computed:{
+    filterTodo:function(){
       if(this.visibility=='all'){
-      return this.todos
-      } else if(this.visibility=='active'){
-        var newToDos = []
+        return this.todos
+      }else if(this.visibility=='active'){
+        var newTodo=[];
         this.todos.forEach(function(item){
-          if (item.completed==false) {
-            newToDos.push(item)
-          }
-        })  
-        return newToDos
-      }else if (this.visibility=='completed') {
-        var newToDos=[]
-        this.todos.forEach(function(item){
-          if (item.completed==true) {
-            newToDos.push(item)
+          if(item.completed==false){
+            newTodo.push(item);
           }
         })
-        return newToDos
+        return newTodo;
+      }else if(this.visibility=='completed'){
+        var newTodo=[];
+        this.todos.forEach(function(item){
+          if(item.completed==true){
+            newTodo.push(item);
+          }
+        })
+        return newTodo;
       }
+    },
+    noDoneTodo:function(){
+      var newTodo = [];
+      this.todos.forEach(function(item){
+        if(item.completed==false){
+          newTodo.push(item);
+        }
+      })
+      return newTodo.length;
     }
-  },
+  }
 });
 </script>
 
